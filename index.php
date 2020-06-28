@@ -1,12 +1,14 @@
 <?php 
-require_once('dbc.php');
-
+require_once('blog.php');
+ini_set('display_errors','On');
 // 名前空間の表示設定
 
-
-
-$blogData = getAllBlog();
-
+$blog= new Blog();
+// var_dump($dbc);
+$blogData = $blog->getAll();
+function h($s){
+    return htmlspecialchars($s,ENT_QUOTES,"UtF-8");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,16 +22,20 @@ $blogData = getAllBlog();
     <p><a href="./form.html">新規作成</a></p>
     <table>
         <tr>
-            <th>No.</th>
+            
             <th>タイトル</th>
             <th>カテゴリ</th>
+            <th>投稿日時</th>
         </tr>
         <?php foreach($blogData as $column): ?>
         <tr>
-            <td><?php echo $column['id'];?> </td>
-            <td><?php echo $column['title'];?> </td>
-            <td><?php echo setCategoryName($column['category']);?> </td>
+            
+            <td><?php echo h($column['title']) ;?> </td>
+            <td><?php echo h($blog->setCategoryName($column['category']));?> </td>
+            <td><?php echo h($column['post_at']);?> </td>
             <td><a href="./detail.php?id=<?php echo $column['id']; ?>"> Detail </a> </td>
+            <td><a href="./update_form.php?id=<?php echo $column['id']; ?>"> Edit </a> </td>
+            <td><a href="./blog_delete.php?id=<?php echo $column['id']; ?>"> Delete </a> </td>
         </tr>
         <?php endforeach; ?>
     </table>

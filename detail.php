@@ -1,8 +1,10 @@
 <?php 
     
-    require_once('./dbc.php');
+    require_once('./blog.php');
+    
+    $blog=new Blog();
     $id=$_GET['id'];
-    $result=getBlog($id);
+    $result=$blog->getById($id);
 
 ?>
 
@@ -17,8 +19,10 @@
     <h2>blog detail</h2>
     <h3>title:<?php echo $result['title'] ?> </h3>
     <p>date:<?php echo $result['post_at'] ?> </p>
-    <p>category:<?php echo setCategoryName($result['category']) ?> </p>
+    <p>category:<?php echo $blog->setCategoryName($result['category']) ?> </p>
     <hr>
     <p>content:<?php echo $result['content'] ?> </p>
+    <br>
+    <a href="index.php">Back</a>
 </body>
 </html>

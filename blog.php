@@ -1,43 +1,87 @@
 <?php
+require_once('dbc.php');
 
-$blog=$_POST;
+// 継承
+Class Blog extends Dbc
+{
+    protected $table_name="blog";
 
-if($blog['publish_status']==='un_publish'){
-    echo '公開中の記事がございません';
-    return;
+    public function setCategoryName($category){
+        if($category==='1'){
+            return 'programming';
+        }else if($category==='2'){
+            return 'daily';
+        }else{
+            return 'other';
+        }
+    }
+
+        public function blogCreate($blogs){
+                $sql="INSERT INTO
+                $this->table_name(title,content,category,publish_status)
+        VALUES
+                (:title,:content,:category,:publish_status)";
+
+        $dbh=$this->dbConnect();
+        $dbh->beginTransaction();
+        try{
+            $stmt=$dbh->prepare($sql);
+            $stmt->bindValue(':title',$blogs['title'],PDO::PARAM_STR);
+            $stmt->bindValue(':content',$blogs['content'],PDO::PARAM_STR);
+            $stmt->bindValue(':category',$blogs['category'],PDO::PARAM_INT);
+            $stmt->bindValue(':publish_status',$blogs['publish_status'],PDO::PARAM_INT);
+            $stmt->execute();
+            $dbh->commit();
+            echo 'ブログを投稿しました';
+            echo "<a href='index.php'>BACK </a>";
+        }catch(PDOException $e){
+            $dbh->rollBack();
+            exit($e);
+        }
+        }
+
+        public function blogUpdate($blogs){
+            $sql="UPDATE $this->table_name SET
+               title=:title,content=:content,category=:category,publish_status=:publish_status
+            WHERE
+                id=:id";
+
+    $dbh=$this->dbConnect();
+    $dbh->beginTransaction();
+    try{
+        $stmt=$dbh->prepare($sql);
+        $stmt->bindValue(':title',$blogs['title'],PDO::PARAM_STR);
+        $stmt->bindValue(':content',$blogs['content'],PDO::PARAM_STR);
+        $stmt->bindValue(':category',$blogs['category'],PDO::PARAM_INT);
+        $stmt->bindValue(':publish_status',$blogs['publish_status'],PDO::PARAM_INT);
+        $stmt->bindValue(':id',$blogs['id'],PDO::PARAM_INT);
+        $stmt->execute();
+        $dbh->commit();
+        echo 'ブログを更新しました';
+    }catch(PDOException $e){
+        $dbh->rollBack();
+        exit($e);
+    }
+        }
+
+        // ブログのバリデーション
+        public function blogValidate($blogs){
+            if(empty($blogs['title'])){
+                exit('タイトルを入力して下さい');
+            }
+            if(mb_strlen($blogs['title'])>191){
+                exit('191文字以下にしてください');
+            }
+            if(empty($blogs['content'])){
+                exit('本文を入力してください');
+            }
+            if(empty($blogs['category'])){
+                exit('カテゴリーは必須です');
+            }
+            if(empty($blogs['publish_status'])){
+                exit('公開ステータスは必須です');
+            }
+        }
 }
-// if($blog['publish_status']==='publish'){
-
-// foreach($blog as $key=>$value){
-//     echo '<pre>';
-//     echo $key.':'.htmlspecialchars($value,ENT_QUOTES,'UTF-8');
-//     echo '<pre>';
-// }
-// }
-// elseif($blog['publish_status']==='un_publish'){
-//     echo '公開中の記事がございません';
-// }
-// else{
-//     echo '記事がありません';
-// }
-
-
-
 
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>blog</title>
-</head>
-<body>
-    <h2><?php echo htmlspecialchars($blog['title'],ENT_QUOTES,'UTF-8'); ?></h2>
-    <p>Date:<?php echo htmlspecialchars($blog['post_at'],ENT_QUOTES,'UTF-8'); ?></p>
-    <p>category:<?php echo htmlspecialchars($blog['category'],ENT_QUOTES,'UTF-8') ; ?>  </p>
-    <hr>
-    <p><?php echo nl2br(htmlspecialchars($blog['content'],ENT_QUOTES,'UTF-8')); ?>   </p>
-</body>
-</html>
